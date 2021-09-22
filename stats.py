@@ -9,10 +9,48 @@ import numpy as np
 
 global numQBStats
 global numReceiverStats
-global numReceiverStatswithRush
+global numRBStats
+global hasAttPass
+global realAbbs
 numQBStats = 16
 numReceiverStats = 9
-numReceiverStatswithRush = 13
+numRBStats = 13
+hasAttPass = True
+realAbbs = {
+'PHI':'PHI',
+'CRD':'ARI',
+'ATL': 'ATL',
+'RAV': 'BAL',
+'BUF':'BUF',
+'CAR': 'CAR',
+'CHI':'CHI',
+'CIN':'CIN',
+'CLE': 'CLE',
+'DAL':'DAL',
+'DEN':'DEN',
+'DET': 'DET',
+'GNB':'GB',
+'HTX':'HOU',
+'CLT':'IND',
+'JAX': 'JAC',
+'KAN': 'KC',
+'RAI': 'LV',
+'SDG': 'LAC',
+'RAM':'LAR',
+'MIA': 'MIA',
+'MIN':'MIN',
+'NWE': 'NE',
+'NOR': 'NO',
+'NYG': 'NYG',
+'NYJ':'NYJ',
+'PIT':'PIT',
+'SFO':'SF',
+'SEA':'SEA',
+'TAM':'TB',
+'OTI':'TEN',
+'WAS': 'WFT'
+}
+
 def seperateGames(stats, PlayerBoxscoreElements):
     numPlayerBoxscoreElements = PlayerBoxscoreElements
     week = len(stats)/ numPlayerBoxscoreElements
@@ -139,53 +177,6 @@ class Player:
 
         return refined_table
 
-    def set_up_dataframe(self):
-        realAbbs = {
-        'PHI':'PHI',
-        'CRD':'ARI',
-        'FALCONS': 'ATL',
-        'RAV': 'BAL',
-        'BUF':'BUF',
-        'CAR': 'CAR',
-        'CHI':'CHI',
-        'CIN':'CIN',
-        'CLE': 'CLE',
-        'DAL':'DAL',
-        'DEN':'DEN',
-        'DET': 'DET',
-        'GNB':'GB',
-        'HTX':'HOU',
-        'CLT':'IND',
-        'JAX': 'JAC',
-        'KAN': 'KC',
-        'RAI': 'LV',
-        'SDG': 'LAC',
-        'RAM':'LAR',
-        'MIA': 'MIA',
-        'MIN':'MIN',
-        'NWE': 'NE',
-        'NOR': 'NO',
-        'NYG': 'NYG',
-        'NYJ':'NYJ',
-        'PIT':'PIT',
-        'SFO':'SF',
-        'SEA':'SEA',
-        'TAM':'TB',
-        'OTI':'TEN',
-        'WAS': 'WFT'
-        }
-        Boxscore = self.getStats()
-        sched = self.get_Player_schedule()
-        row = []
-        val = len(Boxscore)
-        for i in range(val):
-            print(sched[i]._opponent_abbr)
-            row.append(realAbbs[sched[i]._opponent_abbr])
-
-        return Boxscore, row
-
-class Quarterback(Player):
-
     def getStats(self):
         mess = self.find_player_stats_from_html()
         stats = []
@@ -205,6 +196,11 @@ class Quarterback(Player):
                                     stats.append(index[i+1]+index[i+2])
                                 else:
                                     stats.append(index[i+1])
+                                    if index[i+1] == '0':
+                                        stats.append('0%')
+                                        hasAttPass = False
+                                    else:
+                                        hasAttPass = True
                         elif index[10:25] == '"pass_cmp_perc"':
                             if index[i] == '>':
                                 if index[i+5] == '0' or index[i+5] == '1' or index[i+5] == '2' or index[i+5] == '3' or index[i+5] == '4' or index[i+5] == '5' or index[i+5] == '6' or index[i+5] == '7' or index[i+5] == '8' or index[i+5] == '9':
@@ -247,74 +243,7 @@ class Quarterback(Player):
                                     stats.append(index[i+1]+index[i+2]+index[i+3]+index[i+4]+index[i+5])
                                 else:
                                     stats.append(index[i+1]+index[i+2]+index[i+3]+index[i+4])
-                        elif index[10:20] == '"rush_att"':
-                            if index[i] == '>':
-                                if index[i+2] == '0' or index[i+2] == '1' or index[i+2] == '2' or index[i+2] == '3' or index[i+2] == '4' or index[i+2] == '5' or index[i+2] == '6' or index[i+2] == '7' or index[i+2] == '8' or index[i+2] == '9':
-                                    stats.append(index[i+1]+index[i+2])
-                                else:
-                                    stats.append(index[i+1])
-                        elif index[10:20] == '"rush_yds"':
-                            if index[i] == '>':
-                                if index[i+2] == '0' or index[i+2] == '1' or index[i+2] == '2' or index[i+2] == '3' or index[i+2] == '4' or index[i+2] == '5' or index[i+2] == '6' or index[i+2] == '7' or index[i+2] == '8' or index[i+2] == '9':
-                                    if index[i+3] == '0' or index[i+3] == '1' or index[i+3] == '2' or index[i+3] == '3' or index[i+3] == '4' or index[i+3] == '5' or index[i+3] == '6' or index[i+3] == '7' or index[i+3] == '8' or index[i+3] == '9':
-                                        stats.append(index[i+1]+index[i+2]+index[i+3])
-                                    else:
-                                        stats.append(index[i+1]+index[i+2])
-                                else:
-                                    stats.append(index[i+1])
-                        elif index[10:28] == '"rush_yds_per_att"':
-                            if index[i] == '>':
-                                if index[i+3] == '.':
-                                    stats.append(index[i+1]+index[i+2]+index[i+3]+index[i+4]+index[i+5])
-                                else:
-                                    stats.append(index[i+1]+index[i+2]+index[i+3]+index[i+4])
-                        elif index[10:19] == '"rush_td"':
-                            if index[i] == '>':
-                                stats.append(index[i+1])
-                        elif index[10:19] == '"offense"':
-                            if index[i] == '>':
-                                if index[i+2] == '0' or index[i+2] == '1' or index[i+2] == '2' or index[i+2] == '3' or index[i+2] == '4' or index[i+2] == '5' or index[i+2] == '6' or index[i+2] == '7' or index[i+2] == '8' or index[i+2] == '9':
-                                    if index[i+3] == '0' or index[i+3] == '1' or index[i+3] == '2' or index[i+3] == '3' or index[i+3] == '4' or index[i+3] == '5' or index[i+3] == '6' or index[i+3] == '7' or index[i+3] == '8' or index[i+3] == '9':
-                                        stats.append(index[i+1]+index[i+2]+index[i+3])
-                                    else:
-                                        stats.append(index[i+1]+index[i+2])
-                                else:
-                                    stats.append[index[i+1]]
-                        elif index[10:19] == '"off_pct"':
-                            if index[i] == '>':
-                                if index[i+4] == '%':
-                                    stats.append(index[i+1]+index[i+2]+index[i+3]+index[i+4])
-                                elif index[i+3] == '%':
-                                    stats.append(index[i+1]+index[i+2]+index[i+3])
-                                else:
-                                    stats.append(index[i+1]+index[i+2])
-
-
-
-                    except:
-                        continue
-
-        stats = removeJunk(stats)
-        gameLogs = seperateGames(stats,numQBStats)
-
-        return gameLogs
-
-
-    def dataframe(self):
-         playerBoxscore, rows = self.set_up_dataframe()
-         df = pd.DataFrame(data = playerBoxscore, index = rows, columns=['Passes Completed', 'Passes Attempted', 'Completion Percentage', 'Pass Yards', 'Pass TDs', 'Interceptions Thrown', 'Quarterback Rating', 'Fumbles', 'Pass Yds / Attempt', 'Pass Adj Yds / Attempt', 'Rush Attempts', 'Rush Yards', 'Rush Yds / Attempt', 'Rush TDs', 'Snaps Played', '% Total Snaps Played'])
-         display(df)
-
-class Receiver(Player):
-
-    def getStats(self):
-        mess = self.find_player_stats_from_html()
-        stats = []
-        for index in mess:
-            for i in range(len(index)+1):
-                if index[0] == 'd' and index[1] == 'a' and index[2] == 't' and index[3] == 'a' and index[4 ]== '-' and index[5] == 's' and index[6] == 't' and index[7] == 'a' and index[8] == 't':
-                    try:
-                        if index[10:19] == '"targets"':
+                        elif index[10:19] == '"targets"':
                             if index[i] == '>':
                                 if index[i+2] == '0' or index[i+2] == '1' or index[i+2] == '2' or index[i+2] == '3' or index[i+2] == '4' or index[i+2] == '5' or index[i+2] == '6' or index[i+2] == '7' or index[i+2] == '8' or index[i+2] == '9':
                                     stats.append(index[i+1]+index[i+2])
@@ -402,13 +331,54 @@ class Receiver(Player):
 
                     except:
                         continue
-        stats = removeJunk(stats)
-        if isContained(stats[8],'%') == True:
-            gameLogs = seperateGames(stats,numReceiverStats)
-        else:
-            gameLogs = seperateGames(stats,numReceiverStatswithRush)
 
-        return gameLogs
+        stats = removeJunk(stats)
+        count = 0
+        for index in stats:
+            if index == '</td':
+                stats.remove(index)
+                stats.insert(count,'0')
+                count+=1
+
+        return stats
+
+
+class Quarterback(Player):
+    def set_up_dataframe(self):
+        Boxscore = self.getStats()
+        gameLogs = seperateGames(Boxscore,numQBStats)
+        print(gameLogs)
+        sched = self.get_Player_schedule()
+        row = []
+        val = len(gameLogs)
+        for i in range(val):
+            row.append(realAbbs[sched[i]._opponent_abbr])
+
+        return gameLogs, row
+
+    def dataframe(self):
+         playerBoxscore, rows = self.set_up_dataframe()
+         df = pd.DataFrame(data = playerBoxscore, index = rows, columns=['Passes Completed', 'Passes Attempted', 'Completion Percentage', 'Pass Yards', 'Pass TDs', 'Interceptions Thrown', 'Quarterback Rating', 'Fumbles', 'Pass Yds / Attempt', 'Pass Adj Yds / Attempt', 'Rush Attempts', 'Rush Yards', 'Rush Yds / Attempt', 'Rush TDs', 'Snaps Played', '% Total Snaps Played'])
+         display(df)
+
+class Receiver(Player):
+    def set_up_dataframe(self):
+        Boxscore = self.getStats()
+        try:
+           if isContained(Boxscore[8],'%') == True:
+               gameLogs = seperateGames(Boxscore,numReceiverStats)
+           else:
+               gameLogs = seperateGames(Boxscore,numRBStats)
+        except:
+               print("This player has no receiving stats.")
+               quit()
+        sched = self.get_Player_schedule()
+        row = []
+        val = len(gameLogs)
+        for i in range(val):
+            row.append(realAbbs[sched[i]._opponent_abbr])
+
+        return gameLogs, row
 
     def dataframe(self):
          playerBoxscore, rows = self.set_up_dataframe()
@@ -417,8 +387,30 @@ class Receiver(Player):
          else:
              df = pd.DataFrame(data = playerBoxscore, index = rows, columns=['Targets', 'Receptions', 'Rec Yards', 'Yds/Rec','Rec TDs','Catch%', 'Yds/Target', 'Snaps Played', '% Total Snaps Played'])
          display(df)
-firstName = "Julio"
-lastName = "Jones"
-team = "Titans"
-Hurts = Receiver(firstName, lastName, team)
+
+class RunningBack(Player):
+    def set_up_dataframe(self):
+        Boxscore = self.getStats()
+        if len(Boxscore) < numRBStats:
+            print("This player has no rushing stats.")
+            quit()
+        gameLogs = seperateGames(Boxscore,numRBStats)
+        sched = self.get_Player_schedule()
+        row = []
+        val = len(gameLogs)
+        for i in range(val):
+            row.append(realAbbs[sched[i]._opponent_abbr])
+
+        return gameLogs, row
+
+    def dataframe(self):
+        playerBoxscore, rows = self.set_up_dataframe()
+        df = pd.DataFrame(data = playerBoxscore, index = rows, columns=['Rush Attempts', 'Rush Yds', 'Rush Yds/Attempt', 'Rush TD', 'Targets', 'Receptions', 'Rec Yards', 'Yds/Rec','Rec TDs','Catch%', 'Yds/Target', 'Snaps Played', '% Total Snaps Played'])
+        display(df)
+
+### QBS and other positions may be missing a stat if they don't play. Find way to fill that with a 0.
+firstName = "Jalen"
+lastName = "Hurts"
+team = "Eagles"
+Hurts = Quarterback(firstName, lastName, team)
 Hurts.dataframe()
